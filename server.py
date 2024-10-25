@@ -1,9 +1,25 @@
 import socket
 
-def start_server(host='127.0.0.1', port=65432):
+def get_local_ip():
+    """Get the local IP address of the machine."""
+    try:
+        # Create a temporary socket to connect to an external server to get the local IP
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as temp_socket:
+            # We don't actually connect to Google's DNS server, we just use it to get the local IP
+            temp_socket.connect(('8.8.8.8', 80))
+            local_ip = temp_socket.getsockname()[0]  # Get the local IP from the temp socket
+        return local_ip
+    except Exception as e:
+        print(f"Error determining local IP: {e}")
+        return '127.0.0.1'  # Fallback to localhost if unable to determine
+
+def start_server(port=65432):
+    # Dynamically determine the local IP address
+    host = get_local_ip()
+    
     # Create a socket object (AF_INET for IPv4, SOCK_STREAM for TCP)
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
-        # Bind the socket to the address and port
+        # Bind the socket to the dynamically determined address and port
         server_socket.bind((host, port))
         print(f"Server started on {host}:{port}")
         

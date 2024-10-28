@@ -16,11 +16,9 @@ def start_client(server_host='127.0.0.1', server_port=65432, retry_delay=5):
             while True:
                 try:
                     # Input from user to send to server
-                    message = input("Enter a message to send to the server (type 'exit' to quit): ")
+                    message = input("Enter a message to send to the server: ")
                     
-                    if message.lower() == 'exit':
-                        print("Closing connection to server.")
-                        break
+                    
                     
                     # Send the message to the server
                     client_socket.sendall(message.encode('utf-8'))

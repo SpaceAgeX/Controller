@@ -37,16 +37,16 @@ def scan_ip(ip_address, port=65432, timeout=5):
         print(f"Sent message to the server: {message}")
 
         # Wait for the server's response
-        #response = client_socket.recv(1024)  # Buffer size of 1024 bytes
-        #response_decoded = response.decode('utf-8')
-        #print(f"Received response from server: {response_decoded}")
+        response = client_socket.recv(1024)  # Buffer size of 1024 bytes
+        response_decoded = response.decode('utf-8')
+        print(f"Received response from server: {response_decoded}")
 
         # Set the global flag to indicate that we've found a valid IP
         with found_lock:
             if found_ip is None:
                 found_ip = ip_address
                 # Print the successful IP and response
-                msg = f"\n[INFO] Stopping all scans. Found working IP: {found_ip}\n"# + f"Response from server: {response_decoded}"
+                msg = f"\n[INFO] Stopping all scans. Found working IP: {found_ip}\n" + f"Response from server: {response_decoded}"
                 print(f"\n[INFO] Stopping all scans. Found working IP: {found_ip}")
                 #print(f"Response from server: {response_decoded}")
                 return
@@ -76,6 +76,8 @@ def scan_ip_range(starting_digits, port=65432, timeout=5, max_threads=256, start
     for index in range(current_start, 256*256):  # Flattened range from 0 to 65535
         i = index // 256  # First octet (0 to 255)
         j = index % 256  # Second octet (0 to 255)
+
+        
 
         ip_address = f"{starting_digits}.{i}.{j}"
         print(f"Launching scan for {ip_address}...")

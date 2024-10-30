@@ -62,7 +62,7 @@ def scan_ip(ip_address, port=65432, timeout=5):
         client_socket.close()
 
 
-def scan_ip_range(starting_digits, port=65432, timeout=5, max_threads=1024, start_from=0):
+def scan_ip_range(starting_digits, port=65432, timeout=5, max_threads=256, start_from=0):
     """
     Scans all IP addresses in the range {starting_digits}.0.0 to {starting_digits}.255.255.
     Starts scanning from the given index (start_from).

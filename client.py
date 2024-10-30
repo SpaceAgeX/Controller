@@ -21,7 +21,8 @@ def start_client(server_host='127.0.0.1', server_port=65432, retry_delay=5):
                     print("1. Change Volume")
                     print("2. Open Website")
                     print("3. Update Server File")
-                    print("4. Send Custom Command")
+                    print("4. Do Custom Command")
+                    print("5. Get Custom Command")
                     choice = input("Enter your choice: ")
 
                     if choice == '1':
@@ -48,6 +49,9 @@ def start_client(server_host='127.0.0.1', server_port=65432, retry_delay=5):
                     elif choice == '4':
                         command = input("Enter the custom command: ")
                         message = f"do:{command}"
+                    elif choice == '5':
+                        command = input("Enter the custom command: ")
+                        message = f"get:{command}"
                     else:
                         print("Invalid choice. Please try again.")
                         continue

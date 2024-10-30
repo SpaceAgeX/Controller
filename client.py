@@ -1,5 +1,6 @@
 import socket
 import time
+import os
 
 def start_client(server_host='127.0.0.1', server_port=65432, retry_delay=5):
     server_host = input("Enter the server's IP address: ")
@@ -16,9 +17,40 @@ def start_client(server_host='127.0.0.1', server_port=65432, retry_delay=5):
             while True:
                 try:
                     # Input from user to send to server
-                    message = input("Enter a message to send to the server: ")
-                    
-                    
+                    print("\nMenu:")
+                    print("1. Change Volume")
+                    print("2. Open Website")
+                    print("3. Update Server File")
+                    print("4. Send Custom Command")
+                    choice = input("Enter your choice: ")
+
+                    if choice == '1':
+                        volume_level = input("Enter the volume level (0-100): ")
+                        message = f"volume:{volume_level}"
+                    elif choice == '2':
+                        url = input("Enter the website URL: ")
+                        message = f"open:{url}"
+                    elif choice == '3':
+                        # Send server update
+                        file_path = input("Enter the path of the new server file: ")
+                        if os.path.isfile(file_path):
+                            with open(file_path, 'rb') as f:
+                                file_data = f.read()
+                            message = f"update:{os.path.basename(file_path)}"
+                            client_socket.sendall(message.encode('utf-8'))
+                            # Send file contents
+                            client_socket.sendall(file_data)
+                            print("Update sent to the server.")
+                            continue
+                        else:
+                            print("Invalid file path.")
+                            continue
+                    elif choice == '4':
+                        command = input("Enter the custom command: ")
+                        message = f"do:{command}"
+                    else:
+                        print("Invalid choice. Please try again.")
+                        continue
                     
                     # Send the message to the server
                     client_socket.sendall(message.encode('utf-8'))

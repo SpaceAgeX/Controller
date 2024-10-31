@@ -32,7 +32,7 @@ def scan_ip(ip_address, port=65432, timeout=5):
         # If connection is successful, send a message to the server
         print(f"Success! Connected to {ip_address}")
 
-        message = "do:whoami"  # Message to send
+        message = "get:whoami"  # Message to send
         client_socket.sendall(message.encode('utf-8'))
         print(f"Sent message to the server: {message}")
 
@@ -77,7 +77,8 @@ def scan_ip_range(starting_digits, port=65432, timeout=5, max_threads=256, start
         i = index // 256  # First octet (0 to 255)
         j = index % 256  # Second octet (0 to 255)
 
-        
+        if i <= 29:
+            continue
 
         ip_address = f"{starting_digits}.{i}.{j}"
         print(f"Launching scan for {ip_address}...")
